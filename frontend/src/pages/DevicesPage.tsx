@@ -10,13 +10,17 @@ import {
   Cpu,
   Layers,
   ArrowUpDown,
-  Laptop
+  Laptop,
+  Edit3,
+  Wifi
 } from 'lucide-react';
 
 import { api } from '../services/api';
 import { Device } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { DemoBadge } from '../components/common/DemoBadge';
+import { EditDeviceModal } from '../components/devices/EditDeviceModal';
+import { QuickConnectModal } from '../components/devices/QuickConnectModal';
 
 export const DevicesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +28,10 @@ export const DevicesPage: React.FC = () => {
 
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Quick Connect & Edit Modals State
+  const [showQuickConnect, setShowQuickConnect] = useState(false);
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
 
   // Filter States
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -113,6 +121,14 @@ export const DevicesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowQuickConnect(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg shadow-2xs transition-all"
+          >
+            <Wifi className="w-4 h-4 text-indigo-600" />
+            Connect Other PCs
+          </button>
+
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all"
@@ -308,15 +324,27 @@ export const DevicesPage: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/devices/${dev.device_id}`);
-                        }}
-                        className="px-2.5 py-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                      >
-                        Details →
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDevice(dev);
+                          }}
+                          title="Edit System Details"
+                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/devices/${dev.device_id}`);
+                          }}
+                          className="px-2.5 py-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                        >
+                          Details →
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -427,6 +455,30 @@ export const DevicesPage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Edit System Details Modal */}
+      {editingDevice && (
+        <EditDeviceModal
+          device={editingDevice}
+          isOpen={!!editingDevice}
+          onClose={() => setEditingDevice(null)}
+          onUpdated={() => {
+            loadDevices(true);
+            window.dispatchEvent(new CustomEvent('labcare:refresh'));
+          }}
+          onDeleted={() => {
+            loadDevices(true);
+            window.dispatchEvent(new CustomEvent('labcare:refresh'));
+          }}
+        />
+      )}
+      {/* Quick Connect Client Workstations Modal */}
+      {showQuickConnect && (
+        <QuickConnectModal
+          isOpen={showQuickConnect}
+          onClose={() => setShowQuickConnect(false)}
+        />
       )}
     </div>
   );

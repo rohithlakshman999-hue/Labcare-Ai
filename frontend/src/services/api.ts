@@ -51,6 +51,28 @@ export const api = {
       body: JSON.stringify(payload)
     }).then(r => handleResponse<Device>(r)),
 
+  updateDevice: (
+    deviceId: string,
+    payload: {
+      display_name?: string;
+      lab_name?: string;
+      location?: string;
+      operating_system?: string;
+      is_active?: boolean;
+      demo_mode?: boolean;
+    }
+  ): Promise<Device> =>
+    fetch(`${API_BASE}/devices/${deviceId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(r => handleResponse<Device>(r)),
+
+  deleteDevice: (deviceId: string): Promise<{ status: string; message: string }> =>
+    fetch(`${API_BASE}/devices/${deviceId}`, {
+      method: 'DELETE'
+    }).then(r => handleResponse<{ status: string; message: string }>(r)),
+
   enrollDevice: (deviceId: string): Promise<{ device_id: string; enrollment_token: string; message: string }> =>
     fetch(`${API_BASE}/devices/${deviceId}/enroll`, { method: 'POST' }).then(r => handleResponse<{ device_id: string; enrollment_token: string; message: string }>(r)),
 

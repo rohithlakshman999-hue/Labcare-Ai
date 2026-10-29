@@ -20,6 +20,7 @@ class DeviceUpdate(BaseModel):
     location: Optional[str] = None
     operating_system: Optional[str] = None
     is_active: Optional[bool] = None
+    demo_mode: Optional[bool] = None
 
 class DeviceResponse(DeviceBase):
     id: int

@@ -1,0 +1,7 @@
+{
+  "server_ip": "10.10.198.220",
+  "backend_url": "http://10.10.198.220:8000/api",
+  "device_id": "JB1",
+  "token": "lca_agent_5eIqKK9_iSOHmHjY9kCfUGus42gm1eBK",
+  "interval": 5
+}

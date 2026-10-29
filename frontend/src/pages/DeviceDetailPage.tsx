@@ -15,7 +15,8 @@ import {
   FileText,
   Activity,
   Copy,
-  Check
+  Check,
+  Edit3
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -32,6 +33,8 @@ import { api } from '../services/api';
 import { Device, MetricSnapshot, LogEvent, EarlyWarning, Incident, DiagnosticReport } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { DemoBadge } from '../components/common/DemoBadge';
+import { EditDeviceModal } from '../components/devices/EditDeviceModal';
+import { QuickConnectModal } from '../components/devices/QuickConnectModal';
 
 export const DeviceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +46,10 @@ export const DeviceDetailPage: React.FC = () => {
   const [warnings, setWarnings] = useState<EarlyWarning[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Quick Connect & Edit System Details Modals
+  const [showQuickConnect, setShowQuickConnect] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Enrollment Token Modal
   const [enrollToken, setEnrollToken] = useState<string | null>(null);
@@ -161,6 +168,13 @@ export const DeviceDetailPage: React.FC = () => {
                 {device.device_id}
               </span>
               {device.demo_mode && <DemoBadge />}
+              <button
+                onClick={() => setShowEditModal(true)}
+                title="Edit Workstation Details"
+                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors ml-1"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {device.lab_name} • Location: {device.location || 'Row A'} • OS: {device.operating_system}
@@ -170,6 +184,14 @@ export const DeviceDetailPage: React.FC = () => {
 
         {/* Top Actions */}
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg shadow-2xs transition-all"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+            Edit System Details
+          </button>
+
           <button
             onClick={handleRunDiagnosis}
             disabled={diagnosing}
@@ -194,8 +216,43 @@ export const DeviceDetailPage: React.FC = () => {
             <Key className="w-3.5 h-3.5" />
             Agent Token
           </button>
+
+          <button
+            onClick={() => setShowQuickConnect(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg shadow-2xs transition-all"
+          >
+            <Wifi className="w-3.5 h-3.5 text-emerald-600" />
+            Connect Client PC
+          </button>
         </div>
       </div>
+
+      {/* Edit System Details Modal */}
+      {showEditModal && (
+        <EditDeviceModal
+          device={device}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onUpdated={(updated) => {
+            setDevice(updated);
+            window.dispatchEvent(new CustomEvent('labcare:refresh'));
+          }}
+          onDeleted={() => {
+            window.dispatchEvent(new CustomEvent('labcare:refresh'));
+            navigate('/devices');
+          }}
+        />
+      )}
+
+      {/* Quick Connect Client PC Modal */}
+      {showQuickConnect && device && (
+        <QuickConnectModal
+          isOpen={showQuickConnect}
+          onClose={() => setShowQuickConnect(false)}
+          defaultDeviceId={device.device_id}
+          defaultToken={enrollToken || undefined}
+        />
+      )}
 
       {/* Enrollment Token Modal */}
       {enrollToken && (

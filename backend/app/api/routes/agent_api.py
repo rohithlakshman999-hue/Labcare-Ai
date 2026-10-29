@@ -4,13 +4,21 @@ from datetime import datetime, timezone
 from typing import Optional, List
 import random
 
+from pydantic import BaseModel
 from app.db.session import get_db
 from app.models.all_models import Device, MetricSnapshot, LogEvent
 from app.schemas.schemas import MetricCreate, LogCreate
-from app.core.security import verify_token
+from app.core.security import verify_token, generate_agent_token, hash_token
 from app.services.early_warning_engine import EarlyWarningEngine
 
 router = APIRouter(prefix="", tags=["Agent Ingestion & Simulator"])
+
+class QuickEnrollRequest(BaseModel):
+    device_id: str
+    display_name: Optional[str] = None
+    lab_name: Optional[str] = "Lab A (CS Lab)"
+    location: Optional[str] = None
+    operating_system: Optional[str] = "Windows 11 Pro"
 
 def utcnow():
     return datetime.now(timezone.utc)
@@ -32,6 +40,51 @@ def authenticate_agent(device_id: str, authorization: Optional[str], db: Session
         raise HTTPException(status_code=403, detail="Invalid agent authentication token.")
 
     return dev
+
+@router.post("/agent/quick-enroll")
+def agent_quick_enroll(payload: QuickEnrollRequest, db: Session = Depends(get_db)):
+    """
+    Seamless 1-step client workstation onboarding:
+    Finds existing device or automatically creates a new device entry,
+    generates an authorized enrollment token, and returns credentials.
+    """
+    clean_id = payload.device_id.strip().upper()
+    dev = db.query(Device).filter(Device.device_id == clean_id).first()
+
+    if not dev:
+        dev = Device(
+            device_id=clean_id,
+            display_name=payload.display_name or clean_id,
+            lab_name=payload.lab_name or "Lab A (CS Lab)",
+            location=payload.location or "Lab Workstation",
+            operating_system=payload.operating_system or "Windows 11 Pro",
+            connection_status="unknown",
+            health_status="healthy",
+            demo_mode=False,
+            is_active=True
+        )
+        db.add(dev)
+    else:
+        if payload.display_name:
+            dev.display_name = payload.display_name
+        if payload.location:
+            dev.location = payload.location
+        dev.demo_mode = False
+
+    plain_token = generate_agent_token()
+    dev.agent_token_hash = hash_token(plain_token)
+    db.commit()
+    db.refresh(dev)
+
+    return {
+        "status": "enrolled",
+        "device_id": dev.device_id,
+        "token": plain_token,
+        "display_name": dev.display_name,
+        "lab_name": dev.lab_name,
+        "operating_system": dev.operating_system,
+        "message": f"Workstation '{dev.device_id}' connected and enrolled successfully."
+    }
 
 @router.post("/agent/heartbeat")
 def agent_heartbeat(

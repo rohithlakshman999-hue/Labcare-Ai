@@ -189,10 +189,23 @@ def update_device(device_id: str, payload: DeviceUpdate, db: Session = Depends(g
         dev.operating_system = payload.operating_system
     if payload.is_active is not None:
         dev.is_active = payload.is_active
+    if payload.demo_mode is not None:
+        dev.demo_mode = payload.demo_mode
 
     db.commit()
     db.refresh(dev)
     return get_device(device_id, db)
+
+@router.delete("/{device_id}")
+def delete_device(device_id: str, db: Session = Depends(get_db)):
+    """Permanently remove or decommission a workstation registry entry."""
+    dev = db.query(Device).filter(Device.device_id == device_id).first()
+    if not dev:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
+    db.delete(dev)
+    db.commit()
+    return {"status": "ok", "message": f"Workstation '{device_id}' removed successfully."}
 
 @router.post("/{device_id}/enroll", response_model=DeviceEnrollResponse)
 def enroll_agent(device_id: str, db: Session = Depends(get_db)):

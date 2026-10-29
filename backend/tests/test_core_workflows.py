@@ -265,3 +265,41 @@ def test_unauthorized_agent_token_rejection(client, db):
         headers={"Authorization": "Bearer correct_token_123"}
     )
     assert res_ok.status_code == 200
+
+def test_device_update_and_delete(client, db):
+    dev = Device(
+        device_id="TEST-EDIT-DEV",
+        display_name="Original Name",
+        lab_name="Lab A",
+        location="Row 1, Seat 1",
+        operating_system="Windows 10",
+        connection_status="unknown",
+        health_status="healthy",
+        demo_mode=True
+    )
+    db.add(dev)
+    db.commit()
+
+    # Update system details
+    patch_res = client.patch(
+        "/api/devices/TEST-EDIT-DEV",
+        json={
+            "display_name": "Updated System Name",
+            "lab_name": "Lab B (AI Lab)",
+            "location": "Row 4, Seat 2",
+            "operating_system": "Ubuntu 22.04 LTS",
+            "demo_mode": False
+        }
+    )
+    assert patch_res.status_code == 200
+    updated_data = patch_res.json()
+    assert updated_data["display_name"] == "Updated System Name"
+    assert updated_data["lab_name"] == "Lab B (AI Lab)"
+    assert updated_data["location"] == "Row 4, Seat 2"
+    assert updated_data["operating_system"] == "Ubuntu 22.04 LTS"
+    assert updated_data["demo_mode"] is False
+
+    # Delete device
+    del_res = client.delete("/api/devices/TEST-EDIT-DEV")
+    assert del_res.status_code == 200
+    assert client.get("/api/devices/TEST-EDIT-DEV").status_code == 404
