@@ -1,0 +1,136 @@
+{
+  "model_name": "LabCare Telemetry Fault Random Forest",
+  "accuracy": 0.9952380952380953,
+  "classes": [
+    "Excessive CPU Usage",
+    "Healthy",
+    "High Memory Utilization",
+    "Low Disk Space",
+    "Network Connectivity Failure",
+    "Service Failure",
+    "Software / Application Errors"
+  ],
+  "classification_report": {
+    "Excessive CPU Usage": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 60.0
+    },
+    "Healthy": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 60.0
+    },
+    "High Memory Utilization": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 60.0
+    },
+    "Low Disk Space": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 60.0
+    },
+    "Network Connectivity Failure": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 60.0
+    },
+    "Service Failure": {
+      "precision": 0.967741935483871,
+      "recall": 1.0,
+      "f1-score": 0.9836065573770492,
+      "support": 60.0
+    },
+    "Software / Application Errors": {
+      "precision": 1.0,
+      "recall": 0.9666666666666667,
+      "f1-score": 0.9830508474576272,
+      "support": 60.0
+    },
+    "accuracy": 0.9952380952380953,
+    "macro avg": {
+      "precision": 0.9953917050691244,
+      "recall": 0.9952380952380953,
+      "f1-score": 0.9952367721192396,
+      "support": 420.0
+    },
+    "weighted avg": {
+      "precision": 0.9953917050691244,
+      "recall": 0.9952380952380953,
+      "f1-score": 0.9952367721192393,
+      "support": 420.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      60,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      60,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      60,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      60,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      60,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      60,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      58
+    ]
+  ],
+  "test_sample_count": 420
+}
